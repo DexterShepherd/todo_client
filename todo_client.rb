@@ -38,27 +38,23 @@ OptionParser.new do |parser|
       i['status'] == "open"
     end
     open.each_with_index do |val, index|
-      puts ""
       print "#{index} | "
       print "#{val['status']}".colorize(:red)
       print " | "
       puts "#{val['task']}".colorize(:blue)
       val["notes"].each do |i|
-        puts "  #{i}"
+        puts "            - #{i}"
       end
-      puts ""
     end
   end
 
   parser.on("--all", "list all todos") do |a|
     todos.each_with_index do |val, index|
-      puts ""
       print "#{index} | "
       val['status'] == 'done' ? color = :light_blue : color = :red
       print "#{val['status']}".colorize(color)
       print " | "
       puts "#{val['task']}".colorize(:blue)
-      puts ""
     end
   end
 end.parse!
