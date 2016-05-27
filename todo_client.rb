@@ -10,22 +10,27 @@ if File.read(todo_path).empty?
 end
 @todos = JSON.parse(File.read(todo_path))
 
-def print_open
+def print_open(notes=nil)
   open = @todos.select do |i|
     i['status'] == "open"
   end
+  puts "===================================="
   open.each_with_index do |val, index|
     print "#{index} | "
     print "#{val['status']}".colorize(:red)
     print " | "
     puts "#{val['task']}".colorize(:blue)
-    val["notes"].each do |i|
-      puts "            - #{i}"
+    if notes
+      val["notes"].each do |i|
+        puts "            - #{i}"
+      end
     end
   end
+  puts "===================================="
 end
 
 def print_all
+  puts "===================================="
   @todos.each_with_index do |val, index|
     print "#{index} | "
     val['status'] == 'done' ? color = :light_blue : color = :red
@@ -33,6 +38,7 @@ def print_all
     print " | "
     puts "#{val['task']}".colorize(:blue)
   end
+  puts "===================================="
 end
 
 OptionParser.new do |parser|
@@ -61,8 +67,8 @@ OptionParser.new do |parser|
   end
 
 
-  parser.on("-l", "--list", "List open todos") do |l|
-    print_open
+  parser.on("-l", "--list [n]", "List open todos") do |l|
+    print_open(l)
   end
 
   parser.on("--all", "list all todos") do |a|
