@@ -15,7 +15,7 @@ default = {
 }
 
 if File.read(todo_path).empty?
-  File.open(todo_path, 'w'){|f| f.write(default.to_json)}
+  File.open(todo_path, 'w'){|f| f.write(JSON.pretty_generate(default))}
 end
 
 @db = JSON.parse(File.read(todo_path))
@@ -131,4 +131,4 @@ end
 
 @db[@db['list']] = @todos.select{ |i| i['task'] != 'dummy'}
 
-File.open(todo_path, 'w'){|f| f.write(@db.to_json)}
+File.open(todo_path, 'w'){|f| f.write(JSON.pretty_generate(@db))}
