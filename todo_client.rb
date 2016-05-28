@@ -5,10 +5,21 @@ require 'json'
 require 'colorize'
 
 todo_path = ENV['TODO_PATH']
+
+default = {
+  list: "inbox",
+  inbox: [
+    {task: 'dummy', status: 'done'},
+    {task: 'dummy', status: 'done'}
+  ]
+}
+
 if File.read(todo_path).empty?
-  File.open(todo_path, 'w'){|f| f.write([{task: 'dummy', status: 'done'},{task: 'dummy', status: 'done'}].to_json)}
+  File.open(todo_path, 'w'){|f| f.write(default.to_json)}
 end
-@todos = JSON.parse(File.read(todo_path))
+
+@db = JSON.parse(File.read(todo_path))
+@todos = @db[@db['list']]
 
 def print_open(notes=nil)
   open = @todos.select do |i|
@@ -74,6 +85,38 @@ OptionParser.new do |parser|
   parser.on("--all", "list all todos") do |a|
     print_all
   end
+
+  parser.on("--lists", "show all lists") do |l|
+    @db.each do |key, val|
+      puts key unless key == "list"
+    end
+  end
+
+  parser.on("--add_list LIST", "add a new list named LIST") do |l|
+    @todos = [
+      {task: 'dummy', status: 'done'},
+      {task: 'dummy', status: 'done'}
+    ]
+    @db['list'] = l
+  end
+
+  parser.on("-s", "--swtich [list]", "swtitch to LIST") do |s|
+    if @db.key? s 
+      @db['list'] = s
+      @todos = @db[@db['list']]
+    else
+      puts "no list #{s} in db"
+    end
+  end
+
+  parser.on("--delete LIST", "delete LIST") do |d|
+    if @db['list'] == d
+      @db.list = @db.keys[1]
+      @db = @db.select{|key, val| key.to_s != @db[d]}
+    else
+      @db = @db.select{|key, val| key.to_s != @db[d]}
+    end
+  end
 end.parse!
 
 @todos = @todos.sort do |a,b|
@@ -86,5 +129,6 @@ end.parse!
   end
 end
 
-File.open(todo_path, 'w') {|f| f.write(@todos.select{|i| i['task'] != 'dummy'}.to_json)}
+@db[@db['list']] = @todos.select{ |i| i['task'] != 'dummy'}
 
+File.open(todo_path, 'w'){|f| f.write(@db.to_json)}
