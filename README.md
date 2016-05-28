@@ -10,7 +10,7 @@
 
 `-n --new TODO` add a new todo <br>
 `-c --complete INDEX` mark `todo[INDEX]` as complete <br>
-`-l --list [O]` list open todos. eight now any argument just enabled notes<br>
+`-l --list [O]` list open todos. right now any argument just enabled notes<br>
 `-a --all` list all todos <br>
 `-i --index INDEX` select note at `INDEX` to act upon <br>
 `-n --note NOTE` add note to todo selected with `-i` <br>
