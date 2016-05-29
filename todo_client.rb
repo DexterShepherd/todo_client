@@ -87,9 +87,17 @@ OptionParser.new do |parser|
   end
 
   parser.on("--lists", "show all lists") do |l|
+  puts "===================================="
     @db.each do |key, val|
-      puts key unless key == "list"
+      if key != 'list'
+        if key == @db['list']
+          puts key.colorize(:red)
+        else
+          puts key
+        end
+      end
     end
+  puts "===================================="
   end
 
   parser.on("--add_list LIST", "add a new list named LIST") do |l|
