@@ -9,8 +9,8 @@ todo_path = ENV['TODO_PATH']
 default = {
   list: "inbox",
   inbox: [
-    {task: 'dummy', status: 'done'},
-    {task: 'dummy', status: 'done'}
+    {task: 'dummy', status: 'done', notes: [], subtasks: []},
+    {task: 'dummy', status: 'done', notes: [], subtasks: []}
   ]
 }
 
@@ -21,7 +21,7 @@ end
 @db = JSON.parse(File.read(todo_path))
 @todos = @db[@db['list']]
 
-def print_open(notes=nil)
+def print_open(opt)
   open = @todos.select do |i|
     i['status'] == "open"
   end
@@ -31,9 +31,22 @@ def print_open(notes=nil)
     print "#{val['status']}".colorize(:red)
     print " | "
     puts "#{val['task']}".colorize(:blue)
-    if notes
-      val["notes"].each do |i|
-        puts "            - #{i}"
+    unless opt.nil?
+      if opt.include? 's'
+        #todo Fix this code drift by just adding empty subtasks to everything
+        unless val['subtasks'].nil?
+          val["subtasks"].each_with_index do |_val, _index|
+            print "            #{_index} | "
+            print "#{_val['status']}".colorize(:red)
+            print " | "
+            puts "#{_val['task']}".colorize(:blue)
+          end
+        end
+      end
+      if opt.include? 'n'
+        val["notes"].each do |i|
+          puts "            - #{i}"
+        end
       end
     end
   end
@@ -72,11 +85,18 @@ OptionParser.new do |parser|
     print_open
   end
 
-  parser.on("-n", "--note NOTE", "add NOTE to seleced todo" ) do |n|
-    @selected['notes'].push(n) unless @selected.nil?
-    print_open
+  parser.on("-s", "--subtask SUBTASK", "add a subtash to selected") do |s|
+    unless @selected.nil?
+     @selected['subtasks'] = [] if @selected['subtasks'].nil?
+     @selected['subtasks'].unshift({"task" => s, "status" => "open"})
+    end
+    print_open('s')
   end
 
+  parser.on("-n", "--note NOTE", "add NOTE to seleced todo" ) do |n|
+    @selected['notes'].push(n) unless @selected.nil?
+    print_open('n')
+  end
 
   parser.on("-l", "--list [n]", "List open todos") do |l|
     print_open(l)
@@ -108,7 +128,7 @@ OptionParser.new do |parser|
     @db['list'] = l
   end
 
-  parser.on("-s", "--swtich [list]", "swtitch to LIST") do |s|
+  parser.on("--switch LIST", "swtitch to LIST") do |s|
     if @db.key? s 
       @db['list'] = s
       @todos = @db[@db['list']]
